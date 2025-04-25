@@ -66,25 +66,7 @@ export async function POST(req: NextRequest) {
 
     // Requires process.env.SERPAPI_API_KEY to be set: https://serpapi.com/
     // You can remove this or use a different tool instead.
-    const tools = [
-      // new Calculator(),
-      tool(
-        ({ a, b }: { a: number; b: number }): number => {
-          /**
-           * Multiply a and b.
-           */
-          return a * b;
-        },
-        {
-          name: "multiply",
-          description: "Multiply two numbers",
-          schema: z.object({
-            a: z.number(),
-            b: z.number(),
-          }),
-        },
-      ),
-    ];
+    const tools = [new Calculator(), new SerpAPI()];
     const chat = new ChatGoogleGenerativeAI({
       model: "gemini-2.0-flash",
       temperature: 0.2,
