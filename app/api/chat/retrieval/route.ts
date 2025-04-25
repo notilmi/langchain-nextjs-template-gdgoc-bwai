@@ -12,6 +12,7 @@ import {
   BytesOutputParser,
   StringOutputParser,
 } from "@langchain/core/output_parsers";
+import { loadVectorStore } from "./_lib/vectorstore";
 
 export const runtime = "edge";
 
@@ -77,14 +78,8 @@ export async function POST(req: NextRequest) {
       process.env.SUPABASE_URL!,
       process.env.SUPABASE_PRIVATE_KEY!,
     );
-    const vectorstore = new SupabaseVectorStore(
-      new GoogleGenerativeAIEmbeddings(),
-      {
-        client,
-        tableName: "documents",
-        queryName: "match_documents",
-      },
-    );
+
+    const vectorstore = await loadVectorStore();
 
     const standaloneQuestionChain = RunnableSequence.from([
       condenseQuestionPrompt,
