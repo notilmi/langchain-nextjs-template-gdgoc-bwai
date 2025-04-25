@@ -74,11 +74,6 @@ export async function POST(req: NextRequest) {
       temperature: 0.2,
     });
 
-    const client = createClient(
-      process.env.SUPABASE_URL!,
-      process.env.SUPABASE_PRIVATE_KEY!,
-    );
-
     const vectorstore = await loadVectorStore();
 
     const standaloneQuestionChain = RunnableSequence.from([

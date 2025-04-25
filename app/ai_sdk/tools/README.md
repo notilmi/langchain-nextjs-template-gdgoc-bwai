@@ -28,7 +28,7 @@ Start by adding the necessary imports & the `"use server"` directive:
 ```typescript
 "use server";
 
-import { ChatOpenAI } from "@langchain/openai";
+import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
 import { createStreamableValue } from "ai/rsc";
 import { z } from "zod";
@@ -73,8 +73,8 @@ For the main logic, we'll wrap it in an async function. Start by defining our pr
       ["human", "{input}"],
     ]);
 
-    const llm = new ChatOpenAI({
-      model: "gpt-4o-mini",
+    const llm = new ChatGoogleGenerativeAI({
+      model: "gemini-2.5-flash",
       temperature: 0,
     });
 

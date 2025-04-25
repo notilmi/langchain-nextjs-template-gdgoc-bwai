@@ -37,7 +37,7 @@ The first step is to create a new RSC file, and add the imports which we'll use 
 ```typescript action.ts
 "use server";
 
-import { ChatOpenAI } from "@langchain/openai";
+import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
 import { TavilySearchResults } from "@langchain/community/tools/tavily_search";
 import { AgentExecutor, createToolCallingAgent } from "langchain/agents";
@@ -56,8 +56,8 @@ export async function runAgent(input: string) {
 Next, inside our function we'll define our chat model of choice:
 
 ```typescript action.ts
-const llm = new ChatOpenAI({
-  model: "gpt-4o-mini",
+const llm = new ChatGoogleGenerativeAI({
+  model: "gemini-2.0-flash",
   temperature: 0,
 });
 ```
