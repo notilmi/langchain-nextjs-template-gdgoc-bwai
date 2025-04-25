@@ -3,7 +3,7 @@ import { z } from "zod";
 import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
 import { PromptTemplate } from "@langchain/core/prompts";
 
-export const runtime = "edge";
+export const runtime = "nodejs";
 
 const TEMPLATE = `Extract the requested fields from the input.
 

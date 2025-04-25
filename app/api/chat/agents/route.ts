@@ -12,8 +12,10 @@ import {
   SystemMessage,
 } from "@langchain/core/messages";
 import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
+import { tool } from "@langchain/core/tools";
+import { z } from "zod";
 
-export const runtime = "edge";
+export const runtime = "nodejs";
 
 const convertVercelMessageToLangChainMessage = (message: VercelChatMessage) => {
   if (message.role === "user") {
@@ -64,7 +66,25 @@ export async function POST(req: NextRequest) {
 
     // Requires process.env.SERPAPI_API_KEY to be set: https://serpapi.com/
     // You can remove this or use a different tool instead.
-    const tools = [new Calculator(), new SerpAPI()];
+    const tools = [
+      // new Calculator(),
+      tool(
+        ({ a, b }: { a: number; b: number }): number => {
+          /**
+           * Multiply a and b.
+           */
+          return a * b;
+        },
+        {
+          name: "multiply",
+          description: "Multiply two numbers",
+          schema: z.object({
+            a: z.number(),
+            b: z.number(),
+          }),
+        },
+      ),
+    ];
     const chat = new ChatGoogleGenerativeAI({
       model: "gemini-2.0-flash",
       temperature: 0.2,

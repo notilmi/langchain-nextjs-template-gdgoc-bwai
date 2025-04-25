@@ -1,20 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Message as VercelChatMessage, StreamingTextResponse } from "ai";
 
-import { createClient } from "@supabase/supabase-js";
 import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
-import { GoogleGenerativeAIEmbeddings } from "@langchain/google-genai";
 import { PromptTemplate } from "@langchain/core/prompts";
-import { SupabaseVectorStore } from "@langchain/community/vectorstores/supabase";
 import { Document } from "@langchain/core/documents";
 import { RunnableSequence } from "@langchain/core/runnables";
 import {
   BytesOutputParser,
   StringOutputParser,
 } from "@langchain/core/output_parsers";
-import { loadVectorStore } from "./_lib/vectorstore";
+import { loadVectorStore } from "../../_lib/vectorstore";
 
-export const runtime = "edge";
+export const runtime = "nodejs";
 
 const combineDocumentsFn = (docs: Document[]) => {
   const serializedDocs = docs.map((doc) => doc.pageContent);
@@ -74,7 +71,7 @@ export async function POST(req: NextRequest) {
       temperature: 0.2,
     });
 
-    const vectorstore = await loadVectorStore();
+    const vectorstore = loadVectorStore();
 
     const standaloneQuestionChain = RunnableSequence.from([
       condenseQuestionPrompt,

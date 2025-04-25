@@ -1,22 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { RecursiveCharacterTextSplitter } from "@langchain/textsplitters";
-
-import { createClient } from "@supabase/supabase-js";
-import { SupabaseVectorStore } from "@langchain/community/vectorstores/supabase";
 import { GoogleGenerativeAIEmbeddings } from "@langchain/google-genai";
+import { PGVectorStore } from "@langchain/community/vectorstores/pgvector";
+import { Pool } from "@neondatabase/serverless";
+// import { NeonPostgres } from "@langchain/community/vectorstores/neon";
+// import { PineconeStore } from "@langchain/pinecone";
+// import { Pinecone as PineconeClient } from "@pinecone-database/pinecone";
+export const runtime = "nodejs";
 
-export const runtime = "edge";
-
-// Before running, follow set-up instructions at
-// https://js.langchain.com/v0.2/docs/integrations/vectorstores/supabase
-
-/**
- * This handler takes input text, splits it into chunks, and embeds those chunks
- * into a vector store for later retrieval. See the following docs for more information:
- *
- * https://js.langchain.com/v0.2/docs/how_to/recursive_text_splitter
- * https://js.langchain.com/v0.2/docs/integrations/vectorstores/supabase
- */
 export async function POST(req: NextRequest) {
   const body = await req.json();
   const text = body.text;
@@ -34,11 +25,6 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const client = createClient(
-      process.env.SUPABASE_URL!,
-      process.env.SUPABASE_PRIVATE_KEY!,
-    );
-
     const splitter = RecursiveCharacterTextSplitter.fromLanguage("markdown", {
       chunkSize: 256,
       chunkOverlap: 20,
@@ -46,16 +32,39 @@ export async function POST(req: NextRequest) {
 
     const splitDocuments = await splitter.createDocuments([text]);
 
-    const vectorstore = await SupabaseVectorStore.fromDocuments(
+    // Uncomment the following lines to use Pinecone
+    // const pinecone = new PineconeClient();
+    // const pineconeIndex = pinecone.Index(process.env.PINECONE_INDEX!);
+    // await PineconeStore.fromDocuments(
+    //   splitDocuments,
+    //   new GoogleGenerativeAIEmbeddings(),
+    //   {
+    //     pineconeIndex,
+    //     namespace: "documents",
+    //   },
+    // );
+
+    // Uncomment the following lines to use Neon
+    // await NeonPostgres.fromDocuments(
+    //   splitDocuments,
+    //   new GoogleGenerativeAIEmbeddings(),
+    //   {
+    //     connectionString: process.env.NEON_CONNECTION_STRING as string,
+    //     tableName: "documents",
+    //   },
+    // );
+
+    await PGVectorStore.fromDocuments(
       splitDocuments,
       new GoogleGenerativeAIEmbeddings(),
       {
-        client,
+        pool: new Pool({
+          connectionString: process.env.NEON_CONNECTION_STRING as string,
+        }),
         tableName: "documents",
-        queryName: "match_documents",
+        distanceStrategy: "cosine",
       },
     );
-
     return NextResponse.json({ ok: true }, { status: 200 });
   } catch (e: any) {
     return NextResponse.json({ error: e.message }, { status: 500 });
