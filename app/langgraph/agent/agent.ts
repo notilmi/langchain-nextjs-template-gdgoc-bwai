@@ -4,9 +4,12 @@ import {
   START,
   Annotation,
 } from "@langchain/langgraph";
-import { ChatOpenAI } from "@langchain/openai";
+import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
 
-const llm = new ChatOpenAI({ model: "gpt-4o-mini", temperature: 0 });
+const llm = new ChatGoogleGenerativeAI({
+  model: "gemini-2.0-flash",
+  temperature: 0,
+});
 
 const builder = new StateGraph(
   Annotation.Root({

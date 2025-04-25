@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Message as VercelChatMessage, StreamingTextResponse } from "ai";
 
-import { ChatOpenAI } from "@langchain/openai";
+import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
 import { PromptTemplate } from "@langchain/core/prompts";
 import { HttpResponseOutputParser } from "langchain/output_parsers";
 
@@ -33,18 +33,9 @@ export async function POST(req: NextRequest) {
     const currentMessageContent = messages[messages.length - 1].content;
     const prompt = PromptTemplate.fromTemplate(TEMPLATE);
 
-    /**
-     * You can also try e.g.:
-     *
-     * import { ChatAnthropic } from "@langchain/anthropic";
-     * const model = new ChatAnthropic({});
-     *
-     * See a full list of supported models at:
-     * https://js.langchain.com/docs/modules/model_io/models/
-     */
-    const model = new ChatOpenAI({
+    const model = new ChatGoogleGenerativeAI({
       temperature: 0.8,
-      model: "gpt-4o-mini",
+      model: "gemini-2.0-flash",
     });
 
     /**

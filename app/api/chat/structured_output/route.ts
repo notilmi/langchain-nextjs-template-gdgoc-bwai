@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-
 import { z } from "zod";
-
-import { ChatOpenAI } from "@langchain/openai";
+import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
 import { PromptTemplate } from "@langchain/core/prompts";
 
 export const runtime = "edge";
@@ -16,10 +14,10 @@ Input:
 {input}`;
 
 /**
- * This handler initializes and calls an OpenAI Functions powered
+ * This handler initializes and calls a Google Gemini powered
  * structured output chain. See the docs for more information:
  *
- * https://js.langchain.com/v0.2/docs/how_to/structured_output
+ * https://js.langchain.com/docs/integrations/chat/google_generativeai
  */
 export async function POST(req: NextRequest) {
   try {
@@ -28,12 +26,10 @@ export async function POST(req: NextRequest) {
     const currentMessageContent = messages[messages.length - 1].content;
 
     const prompt = PromptTemplate.fromTemplate(TEMPLATE);
-    /**
-     * Function calling is currently only supported with ChatOpenAI models
-     */
-    const model = new ChatOpenAI({
+
+    const model = new ChatGoogleGenerativeAI({
       temperature: 0.8,
-      model: "gpt-4o-mini",
+      model: "gemini-2.0-flash",
     });
 
     /**
@@ -55,18 +51,13 @@ export async function POST(req: NextRequest) {
       .describe("Should always be used to properly format output");
 
     /**
-     * Bind schema to the OpenAI model.
+     * Bind schema to the Gemini model.
      * Future invocations of the returned model will always match the schema.
-     *
-     * Under the hood, uses tool calling by default.
      */
     const functionCallingModel = model.withStructuredOutput(schema, {
       name: "output_formatter",
     });
 
-    /**
-     * Returns a chain with the function calling model.
-     */
     const chain = prompt.pipe(functionCallingModel);
 
     const result = await chain.invoke({

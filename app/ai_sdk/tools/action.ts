@@ -1,12 +1,10 @@
 "use server";
 
-import { ChatOpenAI } from "@langchain/openai";
+import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
 import { createStreamableValue } from "ai/rsc";
 import { z } from "zod";
 import { Runnable } from "@langchain/core/runnables";
-import { zodToJsonSchema } from "zod-to-json-schema";
-import { JsonOutputKeyToolsParser } from "@langchain/core/output_parsers/openai_tools";
 
 const Weather = z
   .object({
@@ -35,8 +33,8 @@ export async function executeTool(
       ["human", "{input}"],
     ]);
 
-    const llm = new ChatOpenAI({
-      model: "gpt-4o-mini",
+    const llm = new ChatGoogleGenerativeAI({
+      model: "gemini-2.0-flash",
       temperature: 0,
     });
 
@@ -49,27 +47,18 @@ export async function executeTool(
         }),
       );
     } else {
-      chain = prompt
-        .pipe(
-          llm.bind({
-            tools: [
-              {
-                type: "function" as const,
-                function: {
-                  name: "get_weather",
-                  description: Weather.description,
-                  parameters: zodToJsonSchema(Weather),
-                },
-              },
-            ],
-          }),
-        )
-        .pipe(
-          new JsonOutputKeyToolsParser<z.infer<typeof Weather>>({
-            keyName: "get_weather",
-            zodSchema: Weather,
-          }),
-        );
+      chain = prompt.pipe(
+        llm.bindTools([
+          {
+            type: "function",
+            function: {
+              name: "get_weather",
+              description: Weather.description,
+              parameters: Weather,
+            },
+          },
+        ]),
+      );
     }
 
     if (options?.streamEvents) {
