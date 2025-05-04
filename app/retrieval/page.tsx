@@ -52,7 +52,7 @@ export default function AgentsPage() {
           </span>
         </li>
         <li>
-          🐶
+          🦜
           <span className="ml-2">
             By default, the agent is pretending to be a talking puppy, but you
             can change the prompt to whatever you want!
@@ -90,7 +90,7 @@ export default function AgentsPage() {
       placeholder={
         'I\'ve got a nose for finding the right documents! Ask, "What is a document loader?"'
       }
-      emoji="🐶"
+      emoji="🦜"
     />
   );
 }
